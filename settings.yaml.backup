@@ -1,0 +1,18 @@
+ui-onboarding:
+  welcomeNoticeVersion: 2026-08-13.1
+llm-pi-ai:
+  providers:
+    qwan:
+      displayName: Qwan3.8
+      apiKeyEnv: QWAN_API_KEY
+      api: openai-completions
+      baseURL: http://host.docker.internal:8080
+      models:
+        - id: Qwen3.8-27B-GSQ-RCO-IQ2_XS
+          name: IQ2_XS
+          contextWindow: 64000
+agent-default-model:
+  provider: qwan
+  model: Qwen3.8-27B-GSQ-RCO-IQ2_XS
+agent-presets:
+  default: minimal

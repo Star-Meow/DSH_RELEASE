@@ -1,0 +1,74 @@
+name: dsh-release
+
+services:
+  dsh-rc12:
+    image: localhost/deepseek-harness:0.1.0-rc.12
+    container_name: dsh-rc12
+
+    # B Compose 對外服務
+    # Windows 127.0.0.1:5000
+    #        ↓
+    # container :4080
+    ports:
+      - "127.0.0.1:5000:4080"
+
+    volumes:
+      # H:\DockerDesktop\Project\DSH_RELEASE\workspace
+      #        ↓
+      # /workspace
+      - ./workspace:/workspace
+
+      # Docker Volume
+      #        ↓
+      # /data/.dsh-settings-volume
+      #
+      # settings.yaml 是檔案，因此不能直接把 Named Volume
+      # 掛到 /data/settings.yaml
+      - dsh-settings:/data/.dsh-settings-volume
+
+      # Docker Volume
+      #        ↓
+      # /data/sessions
+      - dsh-sessions:/data/sessions
+
+      # Docker Volume
+      #        ↓
+      # /home/dsh/TEST/.dsh/skills
+      - dsh-skills:/home/dsh/TEST/.dsh/skills
+
+    # 讓 B container 可以存取 Windows Host
+    # http://host.docker.internal:8080
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+    # 不加入任何其他 Docker network
+    #
+    # 不需要：
+    # networks:
+    #   - dsh-network
+
+    # 啟動前建立 settings.yaml 的 symbolic link
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        ln -sf /data/.dsh-settings-volume/settings.yaml /data/settings.yaml
+        exec node /usr/local/bin/dsh-entrypoint.mjs
+
+    # 沿用 image 既有設定：
+    # ENTRYPOINT ["node","/usr/local/bin/dsh-entrypoint.mjs"]
+    # WORKDIR /workspace
+    # EXPOSE 4080
+    #
+    # DSH_HOME=/data
+    # DSH_WEB_HOST=0.0.0.0
+    # DSH_WEB_PORT=4080
+    # DSH_ALLOW_NON_LOOPBACK=1
+
+volumes:
+  dsh-settings:
+    external: true
+  dsh-sessions:
+    external: true
+  dsh-skills:
+    external: true
